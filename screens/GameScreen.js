@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native'
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, Button, Alert } from 'react-native'
 
 import NumberContainer from '../components/NumberContainer'
 import Card from '../components/Card'
 
-const generateRandomBetween = (min, max, exclude=null) => {
+const generateRandomBetween = (min, max, exclude) => {
     min = Math.ceil(min);
     max = Math.floor(max);
     const rndNum = Math.floor(Math.random() * (max-min)) + min
@@ -19,21 +19,40 @@ const GameScreen = props => {
     const [currentGuess, setCurrentGuess] = useState(
         generateRandomBetween(1, 100, props.userChoice)
     );
-    const [currentMin, setCurrentMin] = useState(1)
-    const [currentMax, setCurrentMax] = useState(100)
+    const [rounds, setRounds] = useState(0);
+    const currentLow = useRef(1);
+    const currentHigh = useRef(100);
+
+    useEffect(() => {
+        if (currentGuess === props.userChoice) {
+            props.onGameOver(rounds);
+        }
+    });
 
     const handleLower = () => {
-        if(currentGuess > 1){
-            setCurrentMax(currentGuess - 1)
-            setCurrentGuess(generateRandomBetween(currentMin, currentGuess))
+        if(currentGuess > 1 && currentGuess > props.userChoice){
+            currentHigh.current = currentGuess - 1;
+            setCurrentGuess(generateRandomBetween(currentMin, currentGuess, currentGuess));
+            setRounds(curRounds => curRounds + 1)
+        }
+        else {
+            Alert.alert("Hmmmm", "Are you sure you're not lying?", [
+                { text: 'Sorry', style: 'cancel' }
+            ]);
         }
     }
 
     const handleGreater = () => {
-        if(currentGuess < 99){
-            setCurrentMin(currentGuess + 1)
-            setCurrentGuess(generateRandomBetween(currentGuess + 1, currentMax))
+        if(currentGuess < 99 && currentGuess < props.userChoice){
+            currentLow.current = currentGuess + 1;
+            setCurrentGuess(generateRandomBetween(currentGuess + 1, currentMax, currentGuess));
         }
+        else {
+            Alert.alert("Hmmmm", "Are you sure you're not lying?", [
+                { text: 'Sorry', style: 'cancel' }
+            ]);
+        }
+        return;
     }
     
     return (
