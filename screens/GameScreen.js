@@ -23,16 +23,18 @@ const GameScreen = props => {
     const currentLow = useRef(1);
     const currentHigh = useRef(100);
 
+    const { userChoice, onGameOver } = props;
+
     useEffect(() => {
-        if (currentGuess === props.userChoice) {
-            props.onGameOver(rounds);
+        if (currentGuess === userChoice) {
+            onGameOver(rounds);
         }
-    });
+    }, [currentGuess, userChoice, onGameOver]);
 
     const handleLower = () => {
         if(currentGuess > 1 && currentGuess > props.userChoice){
             currentHigh.current = currentGuess - 1;
-            setCurrentGuess(generateRandomBetween(currentMin, currentGuess, currentGuess));
+            setCurrentGuess(generateRandomBetween(currentLow.current, currentGuess, currentGuess));
             setRounds(curRounds => curRounds + 1)
         }
         else {
@@ -45,7 +47,8 @@ const GameScreen = props => {
     const handleGreater = () => {
         if(currentGuess < 99 && currentGuess < props.userChoice){
             currentLow.current = currentGuess + 1;
-            setCurrentGuess(generateRandomBetween(currentGuess + 1, currentMax, currentGuess));
+            setCurrentGuess(generateRandomBetween(currentGuess + 1, currentHigh.current, currentGuess));
+            setRounds(curRounds => curRounds + 1)
         }
         else {
             Alert.alert("Hmmmm", "Are you sure you're not lying?", [
